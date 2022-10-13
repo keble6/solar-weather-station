@@ -4,7 +4,8 @@
     "dependencies": {
         "core": "*",
         "radio": "*",
-        "microphone": "*"
+        "microphone": "*",
+        "pxt-DS3231": "github:keble6/pxt-ds3231#v1.0.2"
     },
     "files": [
         "main.blocks",
