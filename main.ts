@@ -31,11 +31,9 @@ function upload () {
     serial.writeValue("count", count)
     if (count > 0) {
         for (let index = 0; index <= count - 1; index++) {
-            let sendDelay = 0
             radio.sendString("" + dateTimeReadings[index] + ",")
+            basic.pause(sendDelay)
             radio.sendString("" + (Readings[index]))
-            serial.writeLine("" + (dateTimeReadings[index]))
-            serial.writeLine("" + (Readings[index]))
             basic.pause(sendDelay)
         }
     }
@@ -68,7 +66,7 @@ radio.onReceivedString(function (receivedString) {
     if (command.compare("rt") == 0) {
         serial.writeLine("#readtime")
         readTime()
-        radio.sendString("r" + dateTimeString)
+        radio.sendString(dateTimeString)
     } else if (command.compare("st") == 0) {
         setTime(stringIn)
     } else if (command.compare("sd") == 0) {
@@ -78,6 +76,7 @@ radio.onReceivedString(function (receivedString) {
         upload()
     } else if (command.compare("xx") == 0) {
         serial.writeLine("#delete readings")
+        resetReadings()
     }
 })
 let VDD = 0
@@ -91,13 +90,15 @@ let count = 0
 let dateTimeString = ""
 let time = ""
 let date = ""
+let sendDelay = 0
+sendDelay = 100
 let oneMinute = 60000
 resetReadings()
 radio.setGroup(1)
 radio.setTransmitPower(7)
 serial.writeLine("#starting")
 loops.everyInterval(oneMinute, function () {
-    if (DS3231.minute() % 1 == 0) {
+    if (DS3231.minute() % 30 == 0) {
         readTime()
         dateTimeReadings.push(dateTimeString)
         VDD = 1023 / pins.analogReadPin(AnalogPin.P0) * 1.26
