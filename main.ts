@@ -3,6 +3,11 @@ function readTime () {
     time = "" + leadingZero(DS3231.hour()) + ":" + leadingZero(DS3231.minute())
     dateTimeString = "" + date + " " + time
 }
+function resetReadings () {
+    count = 0
+    dateTimeReadings = []
+    VDDreadings = []
+}
 function leadingZero (num: number) {
     if (num < 10) {
         return "0" + num
@@ -21,6 +26,17 @@ function setDate (text: string) {
     DS3231.minute(),
     DS3231.second()
     )
+}
+function upload () {
+    serial.writeValue("count", count)
+    if (count > 0) {
+        for (let index5 = 0; index5 <= count - 1; index5++) {
+            let sendDelay = 0
+            radio.sendString("" + dateTimeReadings[index5] + ",")
+            basic.pause(sendDelay)
+            radio.sendValue("VDD", VDDreadings[index5])
+        }
+    }
 }
 function setTime (text: string) {
     params = text.substr(2, text.length - 2)
@@ -50,6 +66,7 @@ radio.onReceivedString(function (receivedString) {
         setDate(stringIn)
     } else if (command.compare("up") == 0) {
         serial.writeLine("#upload")
+        upload()
     } else if (command.compare("xx") == 0) {
         serial.writeLine("#delete readings")
     }
@@ -58,18 +75,24 @@ let VDD = 0
 let command = ""
 let stringIn = ""
 let params = ""
+let VDDreadings: number[] = []
+let dateTimeReadings: number[] = []
+let count = 0
 let dateTimeString = ""
 let time = ""
 let date = ""
 let oneMinute = 60000
+resetReadings()
 radio.setGroup(1)
 radio.setTransmitPower(7)
 serial.writeLine("#starting")
 loops.everyInterval(oneMinute, function () {
     if (DS3231.minute() % 1 == 0) {
+        count += 1
         readTime()
         VDD = 1023 / pins.analogReadPin(AnalogPin.P0) * 1.26
         VDD = Math.round(VDD * 100) / 100
+        VDDreadings.push(VDD)
         serial.writeLine("" + (VDD))
         serial.writeLine(dateTimeString)
     }
