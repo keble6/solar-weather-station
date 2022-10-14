@@ -5,7 +5,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "pxt-DS3231": "github:keble6/pxt-ds3231#v1.0.2"
+        "pxt-DS3231": "github:keble6/pxt-ds3231#v1.0.2",
+        "BME280": "github:makecode-extensions/bme280#v1.1.0"
     },
     "files": [
         "main.blocks",

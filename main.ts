@@ -6,7 +6,7 @@ function readTime () {
 function resetReadings () {
     count = 0
     dateTimeReadings = []
-    VDDreadings = []
+    Readings = []
 }
 function leadingZero (num: number) {
     if (num < 10) {
@@ -30,11 +30,13 @@ function setDate (text: string) {
 function upload () {
     serial.writeValue("count", count)
     if (count > 0) {
-        for (let index5 = 0; index5 <= count - 1; index5++) {
+        for (let index = 0; index <= count - 1; index++) {
             let sendDelay = 0
-            radio.sendString("" + dateTimeReadings[index5] + ",")
+            radio.sendString("" + dateTimeReadings[index] + ",")
+            radio.sendString("" + (Readings[index]))
+            serial.writeLine("" + (dateTimeReadings[index]))
+            serial.writeLine("" + (Readings[index]))
             basic.pause(sendDelay)
-            radio.sendValue("VDD", VDDreadings[index5])
         }
     }
 }
@@ -49,6 +51,13 @@ function setTime (text: string) {
     parseFloat(params.substr(2, 2)),
     0
     )
+}
+function makeWeatherReadings () {
+    BME280.PowerOn()
+    basic.pause(1000)
+    PTH = "" + BME280.pressure(BME280_P.hPa) + "," + BME280.temperature(BME280_T.T_C) + "," + BME280.humidity()
+    serial.writeLine(PTH)
+    BME280.PowerOff()
 }
 radio.onReceivedString(function (receivedString) {
     stringIn = receivedString
@@ -74,9 +83,10 @@ radio.onReceivedString(function (receivedString) {
 let VDD = 0
 let command = ""
 let stringIn = ""
+let PTH = ""
 let params = ""
-let VDDreadings: number[] = []
-let dateTimeReadings: number[] = []
+let Readings: string[] = []
+let dateTimeReadings: string[] = []
 let count = 0
 let dateTimeString = ""
 let time = ""
@@ -88,11 +98,13 @@ radio.setTransmitPower(7)
 serial.writeLine("#starting")
 loops.everyInterval(oneMinute, function () {
     if (DS3231.minute() % 1 == 0) {
-        count += 1
         readTime()
+        dateTimeReadings.push(dateTimeString)
         VDD = 1023 / pins.analogReadPin(AnalogPin.P0) * 1.26
         VDD = Math.round(VDD * 100) / 100
-        VDDreadings.push(VDD)
+        makeWeatherReadings()
+        Readings.push("" + VDD + "," + PTH)
+        count += 1
         serial.writeLine("" + (VDD))
         serial.writeLine(dateTimeString)
     }
