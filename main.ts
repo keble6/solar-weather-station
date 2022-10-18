@@ -15,6 +15,10 @@ function leadingZero (num: number) {
         return convertToText(num)
     }
 }
+input.onButtonPressed(Button.A, function () {
+    readTime()
+    basic.showString(dateTimeString)
+})
 function setDate (text: string) {
     params = text.substr(2, text.length - 2)
     DS3231.dateTime(
@@ -78,6 +82,10 @@ radio.onReceivedString(function (receivedString) {
         serial.writeLine("#delete readings")
         resetReadings()
     }
+})
+input.onButtonPressed(Button.B, function () {
+    makeWeatherReadings()
+    basic.showString(PTH)
 })
 let VDD = 0
 let command = ""
