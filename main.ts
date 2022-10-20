@@ -102,7 +102,7 @@ let sendDelay = 0
 sendDelay = 100
 let oneMinute = 60000
 resetReadings()
-radio.setGroup(1)
+radio.setGroup(2)
 radio.setTransmitPower(7)
 serial.writeLine("#starting")
 loops.everyInterval(oneMinute, function () {
